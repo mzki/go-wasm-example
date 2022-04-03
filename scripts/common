@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# repository root
+SCRIPTS_DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+REPO_ROOT="$( dirname "${SCRIPTS_DIR}" )"
+
+# working directory on the docker image
+DIR_ON_DOCKER=/home/go
+
+# set no path conversion for windows <-> POSIX filesystem for 
+# Git for windows environment, which supplies invalid path to docker.
+export MSYS_NO_PATHCONV=1 
