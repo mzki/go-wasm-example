@@ -5,8 +5,9 @@ source scripts/common
 
 docker run --rm -t \
   -v ${REPO_ROOT}:${DIR_ON_DOCKER} \
-  -v $GOPATH:/go \
   -e "GOPATH=/go" \
+  -e "GOOS=js" \
+  -e "GOARCH=wasm" \
   -w ${DIR_ON_DOCKER} \
-  tinygo/tinygo:0.22.0 \
-  tinygo build -o html/wasm.wasm -target wasm --no-debug ./main.go
+  golang:1.17.1-buster \
+  go build -o html/wasm.wasm ./main.go
