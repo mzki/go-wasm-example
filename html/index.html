@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Testing WebAssembly</title>
+    <style>
+      #canvas {
+		  position: absolute;
+		  left: 0px;
+	  }
+    </style>
+    <script src="wasm_exec.js"></script>
+    <script type="text/javascript">
+
+const go = new Go(); // Defined in wasm_exec.js
+const WASM_URL = 'wasm.wasm';
+
+const sleep = ms => new Promise(res => setTimeout(res, ms))
+
+// Providing the environment object, used in WebAssembly.instantiateStreaming.
+// This part goes after "const go = new Go();" declaration.
+const import_functions = {
+  'main.add': function(x, y) {
+      return x + y
+  },
+  'main.addAsync': async function(x, y) {
+      await sleep(2000) // 2 sec
+      // throw "something wrong"
+      return x + y
+  },
+  'main.addPromiss': async function(x, y, success) {
+      await sleep(2000) // 2 sec
+      success(x + y)
+  }
+  // ... other functions
+}
+
+// set global to expose function to Go
+var addPromiss = import_functions["main.addPromiss"]
+var addAsync = import_functions["main.addAsync"]
+
+function wasm_test_call(wasm) {
+    // Calling the multiply function from WASM
+    console.log('multiplied two numbers:', multiply(5, 3));
+}
+
+var wasm;
+
+if ('instantiateStreaming' in WebAssembly) {
+	WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(function (obj) {
+		wasm = obj.instance;
+		go.run(wasm);
+    wasm_test_call(wasm)
+	})
+} else {
+	fetch(WASM_URL).then(resp =>
+		resp.arrayBuffer()
+	).then(bytes =>
+		WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
+			wasm = obj.instance;
+			go.run(wasm);
+      wasm_test_call(wasm)
+		})
+	)
+}
+
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+  </body>
+</html>

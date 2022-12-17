@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eu
+
+source scripts/common
+
+docker run --rm -t \
+  -v ${REPO_ROOT}:${DIR_ON_DOCKER} \
+  -e "GOPATH=/go" \
+  -w ${DIR_ON_DOCKER} \
+  tinygo/tinygo:0.26.0 \
+  tinygo build -o tiny-html/wasm.wasm -target wasm -no-debug -tags tiny ./main_tinygo.go
+# And copy js dependency from tinygo repository.
+docker run --rm -t \
+  -v ${REPO_ROOT}:${DIR_ON_DOCKER} \
+  -e "GOPATH=/go" \
+  -w ${DIR_ON_DOCKER} \
+  tinygo/tinygo:0.26.0 \
+  cp /usr/local/tinygo/targets/wasm_exec.js $DIR_ON_DOCKER/tiny-html/

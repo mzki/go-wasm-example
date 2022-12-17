@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eu
+
+source scripts/common
+
+docker run --rm -t \
+  -v ${REPO_ROOT}:${DIR_ON_DOCKER} \
+  -e "GOPATH=/go" \
+  -e "GOOS=js" \
+  -e "GOARCH=wasm" \
+  -w ${DIR_ON_DOCKER} \
+  golang:1.19-bullseye \
+  go build -o html/wasm.wasm ./main.go
