@@ -9,5 +9,5 @@ docker run --rm -t \
   -e "GOOS=js" \
   -e "GOARCH=wasm" \
   -w ${DIR_ON_DOCKER} \
-  golang:1.17.1-buster \
+  golang:1.19-bullseye \
   go build -o html/wasm.wasm ./main.go
