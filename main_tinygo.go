@@ -1,5 +1,5 @@
-//go:build js && wasm && !tiny
-// +build js,wasm,!tiny
+//go:build js && wasm && tiny
+// +build js,wasm,tiny
 
 package main
 
@@ -9,25 +9,9 @@ import (
 	"time"
 )
 
-func multiply(this js.Value, args []js.Value) interface{} {
-	if nargs := len(args); nargs != 2 {
-		return js.ValueOf(0)
-	}
-	x := args[0].Int()
-	y := args[1].Int()
-	return js.ValueOf(x * y)
-}
-
-// This calls a JS function from Go.
-func main() {
-	done := make(chan struct{}, 0)
-	// expose functions to js.
-	js.Global().Set("multiply", js.FuncOf(multiply))
-	// call js function from go
-	println("adding promiss two numbers:", addPromissWrap(2, 3))
-	println("adding async two numbers:", addAsyncWrap(2, 3))
-
-	<-done
+//export multiply
+func multiply(x, y int) int {
+	return x * y
 }
 
 // https://stackoverflow.com/a/68427221
@@ -119,8 +103,8 @@ func addPromissWrap(x, y int) int {
 		return nil
 	})
 	defer jsSuccess.Release()
-	addPromiss := js.Global().Get("addPromiss")
-	go addPromiss.Invoke(x, y, jsSuccess)
+	addPromissAsync := js.Global().Get("addPromiss")
+	addPromissAsync.Invoke(x, y, jsSuccess)
 
 	select {
 	case ret := <-ch:
@@ -128,4 +112,11 @@ func addPromissWrap(x, y int) int {
 	case <-ctx.Done():
 		return 0
 	}
+}
+
+// This calls a JS function from Go.
+func main() {
+	// call js function from go
+	println("adding promiss two numbers:", addPromissWrap(2, 3))
+	println("adding async two numbers:", addAsyncWrap(2, 3))
 }
